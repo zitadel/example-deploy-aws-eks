@@ -1,0 +1,249 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "awscli2@latest": {
+      "last_modified": "2025-10-22T20:59:19Z",
+      "resolved": "github:NixOS/nixpkgs/01b6809f7f9d1183a2b3e081f0a1e6f8f415cb09#awscli2",
+      "source": "devbox-search",
+      "version": "2.31.11",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/syyl22zc917z201wa7ghwyxrmdjda8gx-awscli2-2.31.11",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/rahm1y464x1mpcsyrqyqvi3jx8d133d1-awscli2-2.31.11-dist"
+            }
+          ],
+          "store_path": "/nix/store/syyl22zc917z201wa7ghwyxrmdjda8gx-awscli2-2.31.11"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/9vvkxynqnjglw0fjn2pzwxq590a8wyhb-awscli2-2.31.11",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/cvfamk3633h4x98bdgj0kgcsnbfrxv69-awscli2-2.31.11-dist"
+            }
+          ],
+          "store_path": "/nix/store/9vvkxynqnjglw0fjn2pzwxq590a8wyhb-awscli2-2.31.11"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/ixhf6s2qp5dy5q3ri6i3w3rm38xqp105-awscli2-2.31.11",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/lrb7dygv5x0rfql77l4mj3bm7phhndgd-awscli2-2.31.11-dist"
+            }
+          ],
+          "store_path": "/nix/store/ixhf6s2qp5dy5q3ri6i3w3rm38xqp105-awscli2-2.31.11"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/slvn0v4fab6qc8qz11h8mfzpq8avdbz7-awscli2-2.31.11",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/6y2nxxa9gd3wixznaajc5xffnsxixvgp-awscli2-2.31.11-dist"
+            }
+          ],
+          "store_path": "/nix/store/slvn0v4fab6qc8qz11h8mfzpq8avdbz7-awscli2-2.31.11"
+        }
+      }
+    },
+    "kubectl@latest": {
+      "last_modified": "2025-10-22T20:59:19Z",
+      "resolved": "github:NixOS/nixpkgs/01b6809f7f9d1183a2b3e081f0a1e6f8f415cb09#kubectl",
+      "source": "devbox-search",
+      "version": "1.34.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/pv5lknr9a985cdmxy0zqg0vk0562w1js-kubectl-1.34.1",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/5xfa19i31d4vhvbjihf6inqbp410fsp5-kubectl-1.34.1-man",
+              "default": true
+            },
+            {
+              "name": "convert",
+              "path": "/nix/store/ciffxa4czjlmjzmq4yq21l8zkjvadxsq-kubectl-1.34.1-convert"
+            }
+          ],
+          "store_path": "/nix/store/pv5lknr9a985cdmxy0zqg0vk0562w1js-kubectl-1.34.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8xfnh8k465mm5q2cnh83hqk3h4p9i9n2-kubectl-1.34.1",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/0s8wk88y5rnvnbgsy77x3ak02fnsq01i-kubectl-1.34.1-man",
+              "default": true
+            },
+            {
+              "name": "convert",
+              "path": "/nix/store/hhdzbn767znxinwswfqab0d0bg2jpwln-kubectl-1.34.1-convert"
+            }
+          ],
+          "store_path": "/nix/store/8xfnh8k465mm5q2cnh83hqk3h4p9i9n2-kubectl-1.34.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/80mql1xb9i7l5pb9cs5kmmgxhp351lv1-kubectl-1.34.1",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/qf79cl59w1kga58030s9a9nvk2b3m1qc-kubectl-1.34.1-man",
+              "default": true
+            },
+            {
+              "name": "convert",
+              "path": "/nix/store/0msa3w7f7bazgfpa2icmz7fkvcdrn4d7-kubectl-1.34.1-convert"
+            }
+          ],
+          "store_path": "/nix/store/80mql1xb9i7l5pb9cs5kmmgxhp351lv1-kubectl-1.34.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/hkdsjac8x7pvq0lmazmg7qs6y8k6kayh-kubectl-1.34.1",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/g5wlm6mrnf1pgjqapfb5r8zkh37rizgf-kubectl-1.34.1-man",
+              "default": true
+            },
+            {
+              "name": "convert",
+              "path": "/nix/store/aq74byw89ckq4hiw85gl2cq4c8h99wqi-kubectl-1.34.1-convert"
+            }
+          ],
+          "store_path": "/nix/store/hkdsjac8x7pvq0lmazmg7qs6y8k6kayh-kubectl-1.34.1"
+        }
+      }
+    },
+    "ssm-session-manager-plugin@latest": {
+      "last_modified": "2025-10-22T20:59:19Z",
+      "resolved": "github:NixOS/nixpkgs/01b6809f7f9d1183a2b3e081f0a1e6f8f415cb09#ssm-session-manager-plugin",
+      "source": "devbox-search",
+      "version": "1.2.707.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/0wyczp1gzlw90rmn6mc1b56wsxbhbf00-ssm-session-manager-plugin-1.2.707.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/0wyczp1gzlw90rmn6mc1b56wsxbhbf00-ssm-session-manager-plugin-1.2.707.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/63qvyrjg7kssrpx3mz04phq3i0939hwg-ssm-session-manager-plugin-1.2.707.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/63qvyrjg7kssrpx3mz04phq3i0939hwg-ssm-session-manager-plugin-1.2.707.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/c4phj6b49fd080r6nxs8gxf51xami25w-ssm-session-manager-plugin-1.2.707.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/c4phj6b49fd080r6nxs8gxf51xami25w-ssm-session-manager-plugin-1.2.707.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/fwfp7hi3538lc2a7ja9x0xanxxh4305a-ssm-session-manager-plugin-1.2.707.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/fwfp7hi3538lc2a7ja9x0xanxxh4305a-ssm-session-manager-plugin-1.2.707.0"
+        }
+      }
+    },
+    "terraform@latest": {
+      "last_modified": "2025-10-22T20:59:19Z",
+      "resolved": "github:NixOS/nixpkgs/01b6809f7f9d1183a2b3e081f0a1e6f8f415cb09#terraform",
+      "source": "devbox-search",
+      "version": "1.13.4",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/962132zwxzm78igjmhkzbggqb16wnr0q-terraform-1.13.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/962132zwxzm78igjmhkzbggqb16wnr0q-terraform-1.13.4"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4m118wirscay8rsgk5ifn1lak9hnpm2s-terraform-1.13.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/4m118wirscay8rsgk5ifn1lak9hnpm2s-terraform-1.13.4"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/lr0j0zkczx4zg92nry2phh8vs4y4c4zy-terraform-1.13.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/lr0j0zkczx4zg92nry2phh8vs4y4c4zy-terraform-1.13.4"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/sjbyjd98xm8k1q9mq5js7pv1g43660d9-terraform-1.13.4",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/sjbyjd98xm8k1q9mq5js7pv1g43660d9-terraform-1.13.4"
+        }
+      }
+    }
+  }
+}
