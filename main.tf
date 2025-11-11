@@ -33,10 +33,7 @@ terraform {
   }
 }
 
-# Region comes from your AWS CLI config/profile (you already have us-east-1)
-provider "aws" {
-  # region = "us-east-1"
-}
+provider "aws" {}
 
 locals {
   project      = "eks-hello"
@@ -44,14 +41,14 @@ locals {
   common_tags  = { Project = local.project }
 }
 
-# --- Choose control plane AZs (EKS requires at least two supported AZs) ---
 variable "control_plane_azs" {
   description = "AZs to use for control plane subnets"
   type        = list(string)
   default     = ["us-east-1a", "us-east-1b"]
 }
 
-# --- Discover default VPC and its default-per-AZ public subnets ---
+data "aws_caller_identity" "current" {}
+
 data "aws_vpc" "default" {
   default = true
 }
@@ -67,13 +64,11 @@ data "aws_subnets" "default_public" {
   }
 }
 
-# Index each subnet so we can read attributes like AvailabilityZone
 data "aws_subnet" "public" {
   for_each = toset(data.aws_subnets.default_public.ids)
   id       = each.value
 }
 
-# Keep only subnets whose AZ is in var.control_plane_azs, then take first two
 locals {
   two_public_subnets = slice(
     [for s in data.aws_subnet.public : s.id if contains(var.control_plane_azs, s.availability_zone)],
@@ -82,7 +77,6 @@ locals {
   )
 }
 
-# Tag those subnets so classic ELBs can be placed there by Kubernetes (optional but common)
 resource "aws_ec2_tag" "elb_role_tag" {
   for_each    = toset(local.two_public_subnets)
   resource_id = each.value
@@ -90,7 +84,6 @@ resource "aws_ec2_tag" "elb_role_tag" {
   value       = "1"
 }
 
-# This tag is required by the ALB controller for subnet auto-discovery
 resource "aws_ec2_tag" "cluster_share_tag" {
   for_each    = toset(local.two_public_subnets)
   resource_id = each.value
@@ -98,30 +91,22 @@ resource "aws_ec2_tag" "cluster_share_tag" {
   value       = "shared"
 }
 
-# --- EKS Cluster using terraform-aws-modules/eks ---
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.37.2"
 
   cluster_name    = local.cluster_name
   cluster_version = "1.29"
-
-  # Only pass the two supported public subnets
-  subnet_ids = local.two_public_subnets
-
-  vpc_id = data.aws_vpc.default.id
+  subnet_ids      = local.two_public_subnets
+  vpc_id          = data.aws_vpc.default.id
 
   cluster_endpoint_public_access  = true
   cluster_endpoint_private_access = false
+  cluster_enabled_log_types       = ["api", "audit", "authenticator"]
 
-  # Enable control plane logs (useful, and you already used them)
-  cluster_enabled_log_types = ["api", "audit", "authenticator"]
-
-  # Create a KMS key for secrets encryption (mirrors your previous plan)
-  create_kms_key = true
+  create_kms_key  = true
   kms_key_aliases = ["alias/eks/${local.cluster_name}"]
 
-  # Grant your SSO admin role admin access to the cluster via EKS Access Entries
   enable_cluster_creator_admin_permissions = false
   access_entries = {
     cluster_creator = {
@@ -137,34 +122,32 @@ module "eks" {
     }
   }
 
-  # Minimal managed node group
   eks_managed_node_groups = {
     default = {
-      desired_size = 2
-      min_size     = 2
-      max_size     = 3
-
+      desired_size   = 2
+      min_size       = 2
+      max_size       = 3
       instance_types = ["t3.medium"]
       capacity_type  = "ON_DEMAND"
-
-      subnet_ids = local.two_public_subnets
-
-      tags = local.common_tags
+      subnet_ids     = local.two_public_subnets
+      tags           = local.common_tags
     }
   }
 
   tags = merge(local.common_tags, { "terraform-aws-modules" = "eks" })
 }
 
-data "aws_caller_identity" "current" {}
-
-# Give the control plane a few seconds to stabilize before depending resources (handy for follow-on Helm/K8s)
 resource "time_sleep" "post_cluster_pause" {
   create_duration = "30s"
   triggers = {
     endpoint = module.eks.cluster_endpoint
     name     = module.eks.cluster_name
   }
+  depends_on = [module.eks]
+}
+
+data "aws_eks_cluster" "this" {
+  name = module.eks.cluster_name
 }
 
 data "aws_eks_cluster_auth" "this" {
@@ -172,61 +155,30 @@ data "aws_eks_cluster_auth" "this" {
 }
 
 provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "/Users/mridang/Code/zitadel/refarch-eks-deployment/.devbox/nix/profile/default/bin/aws"
-
-    # ADD THE REGION ARGUMENTS HERE
-    args = [
-      "--region",
-      "us-east-1",
-      "eks",
-      "get-token",
-      "--cluster-name",
-      module.eks.cluster_name
-    ]
-
-    env = {
-      AWS_PROFILE = "zitadel"
-    }
-  }
+  host                   = data.aws_eks_cluster.this.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.this.token
 }
 
 provider "helm" {
   kubernetes {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-    exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "/Users/mridang/Code/zitadel/refarch-eks-deployment/.devbox/nix/profile/default/bin/aws"
-
-      # AND ADD THE REGION ARGUMENTS HERE
-      args = [
-        "--region",
-        "us-east-1",
-        "eks",
-        "get-token",
-        "--cluster-name",
-        module.eks.cluster_name
-      ]
-
-      env = {
-        AWS_PROFILE = "zitadel"
-      }
-    }
+    host                   = data.aws_eks_cluster.this.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.this.token
   }
 }
 
-# --- Outputs ---
 output "cluster_name" {
-  value = module.eks.cluster_name
+  description = "EKS cluster name"
+  value       = module.eks.cluster_name
 }
 
-output "next_steps" {
-  description = "What to do next"
-  value       = "Now run: terraform apply -auto-approve -var='deploy_post=true' (to install ALB controller + hello, if you add those resources later)."
+output "cluster_endpoint" {
+  description = "EKS cluster endpoint"
+  value       = module.eks.cluster_endpoint
+}
+
+output "configure_kubectl" {
+  description = "Configure kubectl command"
+  value       = "aws eks update-kubeconfig --region us-east-1 --name ${module.eks.cluster_name}"
 }
