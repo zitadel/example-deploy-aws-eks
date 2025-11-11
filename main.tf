@@ -90,6 +90,14 @@ resource "aws_ec2_tag" "elb_role_tag" {
   value       = "1"
 }
 
+# This tag is required by the ALB controller for subnet auto-discovery
+resource "aws_ec2_tag" "cluster_share_tag" {
+  for_each    = toset(local.two_public_subnets)
+  resource_id = each.value
+  key         = "kubernetes.io/cluster/${local.cluster_name}"
+  value       = "shared"
+}
+
 # --- EKS Cluster using terraform-aws-modules/eks ---
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -159,24 +167,59 @@ resource "time_sleep" "post_cluster_pause" {
   }
 }
 
-# --- (Optional) Wire up Kubernetes/Helm providers if you plan to install addons here ---
-# provider "kubernetes" {
-#   host                   = module.eks.cluster_endpoint
-#   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-#   token                  = data.aws_eks_cluster_auth.this.token
-# }
-#
-# data "aws_eks_cluster_auth" "this" {
-#   name = module.eks.cluster_name
-# }
-#
-# provider "helm" {
-#   kubernetes {
-#     host                   = module.eks.cluster_endpoint
-#     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-#     token                  = data.aws_eks_cluster_auth.this.token
-#   }
-# }
+data "aws_eks_cluster_auth" "this" {
+  name = module.eks.cluster_name
+}
+
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    command     = "/Users/mridang/Code/zitadel/refarch-eks-deployment/.devbox/nix/profile/default/bin/aws"
+
+    # ADD THE REGION ARGUMENTS HERE
+    args = [
+      "--region",
+      "us-east-1",
+      "eks",
+      "get-token",
+      "--cluster-name",
+      module.eks.cluster_name
+    ]
+
+    env = {
+      AWS_PROFILE = "zitadel"
+    }
+  }
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "/Users/mridang/Code/zitadel/refarch-eks-deployment/.devbox/nix/profile/default/bin/aws"
+
+      # AND ADD THE REGION ARGUMENTS HERE
+      args = [
+        "--region",
+        "us-east-1",
+        "eks",
+        "get-token",
+        "--cluster-name",
+        module.eks.cluster_name
+      ]
+
+      env = {
+        AWS_PROFILE = "zitadel"
+      }
+    }
+  }
+}
 
 # --- Outputs ---
 output "cluster_name" {

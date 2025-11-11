@@ -1,13 +1,14 @@
 {
-	"$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.10.7/.schema/devbox.schema.json",
-	"packages": [
-		"terraform@latest",
-		"awscli2@latest",
-		"ssm-session-manager-plugin@latest",
-		"kubectl@latest"
-	],
-	"env": {
-    "AWS_PROFILE": "zitadel",
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.10.7/.schema/devbox.schema.json",
+  "packages": [
+    "terraform@latest",
+    "awscli2@latest",
+    "ssm-session-manager-plugin@latest",
+    "kubectl@latest",
+    "kubernetes-helm@latest"
+  ],
+  "env": {
+    "AWS_PROFILE":        "zitadel",
     "AWS_DEFAULT_REGION": "us-east-1"
-	}
+  }
 }
