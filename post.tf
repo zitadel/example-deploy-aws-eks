@@ -24,6 +24,38 @@ module "lb_irsa" {
   tags = local.common_tags
 }
 
+resource "tls_private_key" "alb_cert" {
+  count     = var.deploy_post ? 1 : 0
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "tls_self_signed_cert" "alb_cert" {
+  count           = var.deploy_post ? 1 : 0
+  private_key_pem = tls_private_key.alb_cert[0].private_key_pem
+
+  subject {
+    common_name  = "*.elb.amazonaws.com"
+    organization = "Test Organization"
+  }
+
+  validity_period_hours = 8760  # 1 year
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+}
+
+resource "aws_acm_certificate" "alb_cert" {
+  count             = var.deploy_post ? 1 : 0
+  private_key       = tls_private_key.alb_cert[0].private_key_pem
+  certificate_body  = tls_self_signed_cert.alb_cert[0].cert_pem
+
+  tags = local.common_tags
+}
+
 resource "helm_release" "aws_load_balancer_controller" {
   count      = var.deploy_post ? 1 : 0
   name       = "aws-load-balancer-controller"
@@ -68,50 +100,27 @@ resource "helm_release" "hello_world" {
   wait             = true
   timeout          = 300
 
-  set {
-    name  = "service.type"
-    value = "ClusterIP"
-  }
-
-  set {
-    name  = "ingress.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "ingress.hostname"
-    value = ""
-  }
-
-  set {
-    name  = "ingress.ingressClassName"
-    value = "alb"
-  }
-
-  set {
-    name  = "ingress.annotations.alb\\.ingress\\.kubernetes\\.io/scheme"
-    value = "internet-facing"
-  }
-
-  set {
-    name  = "ingress.annotations.alb\\.ingress\\.kubernetes\\.io/target-type"
-    value = "ip"
-  }
-
-  set {
-    name  = "ingress.annotations.alb\\.ingress\\.kubernetes\\.io/healthcheck-path"
-    value = "/"
-  }
-
-  set {
-    name  = "ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports"
-    value = "[{\"HTTP\":80}]"
-  }
-
-  set {
-    name  = "ingress.annotations.alb\\.ingress\\.kubernetes\\.io/subnets"
-    value = join("\\,", local.two_public_subnets)
-  }
+  values = [
+    yamlencode({
+      service = {
+        type = "ClusterIP"
+      }
+      ingress = {
+        enabled          = true
+        hostname         = ""
+        ingressClassName = "alb"
+        annotations = {
+          "alb.ingress.kubernetes.io/scheme"           = "internet-facing"
+          "alb.ingress.kubernetes.io/target-type"      = "ip"
+          "alb.ingress.kubernetes.io/healthcheck-path" = "/"
+          "alb.ingress.kubernetes.io/listen-ports"     = "[{\"HTTP\":80},{\"HTTPS\":443}]"
+          "alb.ingress.kubernetes.io/ssl-redirect"     = "443"
+          "alb.ingress.kubernetes.io/certificate-arn"  = aws_acm_certificate.alb_cert[0].arn
+          "alb.ingress.kubernetes.io/subnets" = join(",", local.two_public_subnets)
+        }
+      }
+    })
+  ]
 
   depends_on = [helm_release.aws_load_balancer_controller]
 }
