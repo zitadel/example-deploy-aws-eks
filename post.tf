@@ -24,6 +24,33 @@ module "lb_irsa" {
   tags = local.common_tags
 }
 
+########################################
+# IRSA for ADOT Collector (NEW)
+########################################
+module "adot_irsa" {
+  count   = var.deploy_post ? 1 : 0
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.60.0"
+
+  role_name_prefix = "${module.eks.cluster_name}-adot-"
+
+  # Attach the standard AWS-managed policies for ADOT
+  role_policy_arns = {
+    CloudWatchAgentServerPolicy = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+    XRayDaemonWriteAccess       = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+  }
+
+  oidc_providers = {
+    this = {
+      provider_arn = module.eks.oidc_provider_arn
+      # This is the default namespace and SA name for the ADOT chart
+      namespace_service_accounts = ["amazon-cloudwatch:adot-collector"]
+    }
+  }
+
+  tags = local.common_tags
+}
+
 resource "tls_private_key" "alb_cert" {
   count     = var.deploy_post ? 1 : 0
   algorithm = "RSA"
@@ -88,6 +115,55 @@ resource "helm_release" "aws_load_balancer_controller" {
   }
 
   depends_on = [module.lb_irsa]
+}
+
+########################################
+# ADOT Collector (NEW)
+########################################
+########################################
+# ADOT Collector (FIXED)
+########################################
+resource "helm_release" "adot_collector" {
+  count = var.deploy_post ? 1 : 0
+
+  name  = "adot-collector"
+  chart = "./adot-exporter-for-eks-on-ec2"
+
+  namespace        = "amazon-cloudwatch"
+  create_namespace = true
+  wait             = true
+  timeout          = 300
+
+  values = [
+    yamlencode({
+      clusterName = module.eks.cluster_name
+      region      = data.aws_region.current.name
+
+      adotCollector = {
+        daemonSet = {
+          createNamespace = false
+          namespace       = "amazon-cloudwatch"
+          serviceAccount = {
+            create = true
+            name   = "adot-collector"
+            annotations = {
+              "eks.amazonaws.com/role-arn" = module.adot_irsa[0].iam_role_arn
+            }
+          }
+          service = {
+            metrics = {
+              receivers  = ["awscontainerinsightreceiver"]
+              processors = ["batch/metrics"]
+              exporters  = ["awsemf"]
+            }
+            extensions = ["health_check", "sigv4auth"]
+          }
+        }
+      }
+    })
+  ]
+
+  depends_on = [module.adot_irsa]
 }
 
 resource "helm_release" "hello_world" {
