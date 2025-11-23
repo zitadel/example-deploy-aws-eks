@@ -24,9 +24,6 @@ module "lb_irsa" {
   tags = local.common_tags
 }
 
-########################################
-# IRSA for ADOT Collector (NEW)
-########################################
 module "adot_irsa" {
   count   = var.deploy_post ? 1 : 0
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
@@ -34,7 +31,6 @@ module "adot_irsa" {
 
   role_name_prefix = "${module.eks.cluster_name}-adot-"
 
-  # Attach the standard AWS-managed policies for ADOT
   role_policy_arns = {
     CloudWatchAgentServerPolicy = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
     XRayDaemonWriteAccess       = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
@@ -42,43 +38,10 @@ module "adot_irsa" {
 
   oidc_providers = {
     this = {
-      provider_arn = module.eks.oidc_provider_arn
-      # This is the default namespace and SA name for the ADOT chart
+      provider_arn               = module.eks.oidc_provider_arn
       namespace_service_accounts = ["amazon-cloudwatch:adot-collector"]
     }
   }
-
-  tags = local.common_tags
-}
-
-resource "tls_private_key" "alb_cert" {
-  count     = var.deploy_post ? 1 : 0
-  algorithm = "RSA"
-  rsa_bits  = 2048
-}
-
-resource "tls_self_signed_cert" "alb_cert" {
-  count           = var.deploy_post ? 1 : 0
-  private_key_pem = tls_private_key.alb_cert[0].private_key_pem
-
-  subject {
-    common_name  = "*.elb.amazonaws.com"
-    organization = "Test Organization"
-  }
-
-  validity_period_hours = 8760  # 1 year
-
-  allowed_uses = [
-    "key_encipherment",
-    "digital_signature",
-    "server_auth",
-  ]
-}
-
-resource "aws_acm_certificate" "alb_cert" {
-  count             = var.deploy_post ? 1 : 0
-  private_key       = tls_private_key.alb_cert[0].private_key_pem
-  certificate_body  = tls_self_signed_cert.alb_cert[0].cert_pem
 
   tags = local.common_tags
 }
@@ -117,12 +80,6 @@ resource "helm_release" "aws_load_balancer_controller" {
   depends_on = [module.lb_irsa]
 }
 
-########################################
-# ADOT Collector (NEW)
-########################################
-########################################
-# ADOT Collector (FIXED)
-########################################
 resource "helm_release" "adot_collector" {
   count = var.deploy_post ? 1 : 0
 
@@ -206,13 +163,13 @@ resource "helm_release" "podinfo" {
           "alb.ingress.kubernetes.io/healthcheck-path" = "/healthz"
           "alb.ingress.kubernetes.io/listen-ports"     = "[{\"HTTP\":80},{\"HTTPS\":443}]"
           "alb.ingress.kubernetes.io/ssl-redirect"     = "443"
-          "alb.ingress.kubernetes.io/certificate-arn"  = aws_acm_certificate.alb_cert[0].arn
+          "alb.ingress.kubernetes.io/certificate-arn"  = aws_acm_certificate.wildcard.arn
           "alb.ingress.kubernetes.io/subnets"          = join(",", local.two_public_subnets)
           "alb.ingress.kubernetes.io/backend-protocol" = "HTTP"
         }
         hosts = [
           {
-            host = ""
+            host = var.app_domain
             paths = [
               {
                 path     = "/"
@@ -225,7 +182,7 @@ resource "helm_release" "podinfo" {
     })
   ]
 
-  depends_on = [helm_release.aws_load_balancer_controller]
+  depends_on = [helm_release.aws_load_balancer_controller, aws_acm_certificate_validation.wildcard]
 }
 
 resource "kubernetes_manifest" "podinfo_grpc_ingress" {
@@ -243,7 +200,7 @@ resource "kubernetes_manifest" "podinfo_grpc_ingress" {
         "alb.ingress.kubernetes.io/target-type"              = "ip"
         "alb.ingress.kubernetes.io/backend-protocol-version" = "HTTP2"
         "alb.ingress.kubernetes.io/listen-ports"             = "[{\"HTTPS\":8443}]"
-        "alb.ingress.kubernetes.io/certificate-arn"          = aws_acm_certificate.alb_cert[0].arn
+        "alb.ingress.kubernetes.io/certificate-arn"          = aws_acm_certificate.wildcard.arn
         "alb.ingress.kubernetes.io/subnets"                  = join(",", local.two_public_subnets)
       }
     }
