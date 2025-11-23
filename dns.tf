@@ -9,12 +9,12 @@ resource "aws_route53_record" "wildcard" {
   type    = "A"
 
   alias {
-    name                   = data.kubernetes_ingress_v1.podinfo_ingress[0].status[0].load_balancer[0].ingress[0].hostname
+    name                   = data.kubernetes_ingress_v1.alb_bootstrap[0].status[0].load_balancer[0].ingress[0].hostname
     zone_id                = data.aws_elb_hosted_zone_id.main.id
     evaluate_target_health = true
   }
 
-  depends_on = [data.kubernetes_ingress_v1.podinfo_ingress]
+  depends_on = [data.kubernetes_ingress_v1.alb_bootstrap]
 }
 
 data "aws_elb_hosted_zone_id" "main" {}
