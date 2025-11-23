@@ -88,7 +88,7 @@ resource "helm_release" "adot_collector" {
   values = [
     yamlencode({
       clusterName = module.eks.cluster_name
-      region      = data.aws_region.current.name
+      awsRegion      = data.aws_region.current.name
 
       adotCollector = {
         image = {
@@ -141,7 +141,7 @@ resource "helm_release" "podinfo" {
       extraEnvs = [
         {
           name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
-          value = "adot-collector-daemonset-service.amazon-cloudwatch.svc.cluster.local:4317"
+          value = "http://adot-collector-daemonset-service.amazon-cloudwatch.svc.cluster.local:4317"
         }
       ]
       extraArgs = [
