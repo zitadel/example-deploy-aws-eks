@@ -46,10 +46,10 @@ spec:
     {{- end }}
       serviceAccountName: {{ include "aws-load-balancer-controller.serviceAccountName" . }}
       volumes:
-      - name: cert
-        secret:
-          defaultMode: 420
-          secretName: {{ template "aws-load-balancer-controller.webhookCertSecret" . }}
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: {{ template "aws-load-balancer-controller.webhookCertSecret" . }}
       {{- with .Values.extraVolumes }}
       {{ toYaml . | nindent 6 }}
       {{- end }}
@@ -62,178 +62,178 @@ spec:
       dnsPolicy: {{ .Values.dnsPolicy }}
       {{- end }}
       containers:
-      - name: {{ .Chart.Name }}
-        args:
-        - --cluster-name={{ required "Chart cannot be installed without a valid clusterName!" (tpl (default "" .Values.clusterName) .) }}
+        - name: {{ .Chart.Name }}
+          args:
+            - --cluster-name={{ required "Chart cannot be installed without a valid clusterName!" (tpl (default "" .Values.clusterName) .) }}
         {{- if .Values.ingressClass }}
-        - --ingress-class={{ .Values.ingressClass }}
+            - --ingress-class={{ .Values.ingressClass }}
         {{- end }}
         {{- $region := tpl (default "" .Values.region) . }}
         {{- if $region }}
-        - --aws-region={{ $region }}
+            - --aws-region={{ $region }}
         {{- end }}
         {{- $vpcID := tpl (default "" .Values.vpcId) . }}
         {{- if $vpcID }}
-        - --aws-vpc-id={{ $vpcID }}
+            - --aws-vpc-id={{ $vpcID }}
         {{- end }}
         {{- if .Values.awsApiEndpoints }}
-        - --aws-api-endpoints={{ .Values.awsApiEndpoints }}
+            - --aws-api-endpoints={{ .Values.awsApiEndpoints }}
         {{- end }}
         {{- if .Values.awsApiThrottle }}
-        - --aws-api-throttle={{ join "," .Values.awsApiThrottle }}
+            - --aws-api-throttle={{ join "," .Values.awsApiThrottle }}
         {{- end }}
         {{- if .Values.awsMaxRetries }}
-        - --aws-max-retries={{ .Values.awsMaxRetries }}
+            - --aws-max-retries={{ .Values.awsMaxRetries }}
         {{- end }}
         {{- if kindIs "bool" .Values.enablePodReadinessGateInject }}
-        - --enable-pod-readiness-gate-inject={{ .Values.enablePodReadinessGateInject }}
+            - --enable-pod-readiness-gate-inject={{ .Values.enablePodReadinessGateInject }}
         {{- end }}
         {{- if kindIs "bool" .Values.enableShield }}
-        - --enable-shield={{ .Values.enableShield }}
+            - --enable-shield={{ .Values.enableShield }}
         {{- end }}
         {{- if kindIs "bool" .Values.enableWaf }}
-        - --enable-waf={{ .Values.enableWaf }}
+            - --enable-waf={{ .Values.enableWaf }}
         {{- end }}
         {{- if kindIs "bool" .Values.enableWafv2 }}
-        - --enable-wafv2={{ .Values.enableWafv2 }}
+            - --enable-wafv2={{ .Values.enableWafv2 }}
         {{- end }}
         {{- if .Values.metricsBindAddr }}
-        - --metrics-bind-addr={{ .Values.metricsBindAddr }}
+            - --metrics-bind-addr={{ .Values.metricsBindAddr }}
         {{- end }}
         {{- if .Values.ingressMaxConcurrentReconciles }}
-        - --ingress-max-concurrent-reconciles={{ .Values.ingressMaxConcurrentReconciles }}
+            - --ingress-max-concurrent-reconciles={{ .Values.ingressMaxConcurrentReconciles }}
         {{- end }}
         {{- if .Values.serviceMaxConcurrentReconciles }}
-        - --service-max-concurrent-reconciles={{ .Values.serviceMaxConcurrentReconciles }}
+            - --service-max-concurrent-reconciles={{ .Values.serviceMaxConcurrentReconciles }}
         {{- end }}
         {{- if .Values.targetgroupbindingMaxConcurrentReconciles }}
-        - --targetgroupbinding-max-concurrent-reconciles={{ .Values.targetgroupbindingMaxConcurrentReconciles }}
+            - --targetgroupbinding-max-concurrent-reconciles={{ .Values.targetgroupbindingMaxConcurrentReconciles }}
         {{- end }}
         {{- if .Values.targetgroupbindingMaxExponentialBackoffDelay }}
-        - --targetgroupbinding-max-exponential-backoff-delay={{ .Values.targetgroupbindingMaxExponentialBackoffDelay }}
+            - --targetgroupbinding-max-exponential-backoff-delay={{ .Values.targetgroupbindingMaxExponentialBackoffDelay }}
         {{- end }}
         {{- if .Values.lbStabilizationMonitorInterval }}
-        - --lb-stabilization-monitor-interval={{ .Values.lbStabilizationMonitorInterval }}
+            - --lb-stabilization-monitor-interval={{ .Values.lbStabilizationMonitorInterval }}
         {{- end }}
         {{- if .Values.logLevel }}
-        - --log-level={{ .Values.logLevel }}
+            - --log-level={{ .Values.logLevel }}
         {{- end }}
         {{- if .Values.webhookBindPort }}
-        - --webhook-bind-port={{ .Values.webhookBindPort }}
+            - --webhook-bind-port={{ .Values.webhookBindPort }}
         {{- end }}
         {{- if .Values.syncPeriod }}
-        - --sync-period={{ .Values.syncPeriod }}
+            - --sync-period={{ .Values.syncPeriod }}
         {{- end }}
         {{- if .Values.watchNamespace }}
-        - --watch-namespace={{ .Values.watchNamespace }}
+            - --watch-namespace={{ .Values.watchNamespace }}
         {{- end }}
         {{- if kindIs "bool" .Values.disableIngressClassAnnotation }}
-        - --disable-ingress-class-annotation={{ .Values.disableIngressClassAnnotation }}
+            - --disable-ingress-class-annotation={{ .Values.disableIngressClassAnnotation }}
         {{- end }}
         {{- if kindIs "bool" .Values.disableIngressGroupNameAnnotation }}
-        - --disable-ingress-group-name-annotation={{ .Values.disableIngressGroupNameAnnotation }}
+            - --disable-ingress-group-name-annotation={{ .Values.disableIngressGroupNameAnnotation }}
         {{- end }}
         {{- if kindIs "bool" .Values.tolerateNonExistentBackendService }}
-        - --tolerate-non-existent-backend-service={{ .Values.tolerateNonExistentBackendService }}
+            - --tolerate-non-existent-backend-service={{ .Values.tolerateNonExistentBackendService }}
         {{- end }}
         {{- if kindIs "bool" .Values.tolerateNonExistentBackendAction }}
-        - --tolerate-non-existent-backend-action={{ .Values.tolerateNonExistentBackendAction }}
+            - --tolerate-non-existent-backend-action={{ .Values.tolerateNonExistentBackendAction }}
         {{- end }}
         {{- if .Values.defaultSSLPolicy }}
-        - --default-ssl-policy={{ .Values.defaultSSLPolicy }}
+            - --default-ssl-policy={{ .Values.defaultSSLPolicy }}
         {{- end }}
         {{- if .Values.externalManagedTags }}
-        - --external-managed-tags={{ join "," .Values.externalManagedTags }}
+            - --external-managed-tags={{ join "," .Values.externalManagedTags }}
         {{- end }}
         {{- if .Values.defaultTags }}
-        - --default-tags={{ include "aws-load-balancer-controller.convertMapToCsv" .Values.defaultTags | trimSuffix "," }}
+            - --default-tags={{ include "aws-load-balancer-controller.convertMapToCsv" .Values.defaultTags | trimSuffix "," }}
         {{- end }}
         {{- if kindIs "bool" .Values.enableEndpointSlices }}
-        - --enable-endpoint-slices={{ .Values.enableEndpointSlices }}
+            - --enable-endpoint-slices={{ .Values.enableEndpointSlices }}
         {{- end }}
         {{- if kindIs "bool" .Values.enableBackendSecurityGroup }}
-        - --enable-backend-security-group={{ .Values.enableBackendSecurityGroup }}
+            - --enable-backend-security-group={{ .Values.enableBackendSecurityGroup }}
         {{- end }}
         {{- if kindIs "bool" .Values.enableManageBackendSecurityGroupRules }}
-        - --enable-manage-backend-security-group-rules={{ .Values.enableManageBackendSecurityGroupRules }}
+            - --enable-manage-backend-security-group-rules={{ .Values.enableManageBackendSecurityGroupRules }}
         {{- end }}
         {{- if .Values.backendSecurityGroup }}
-        - --backend-security-group={{ .Values.backendSecurityGroup }}
+            - --backend-security-group={{ .Values.backendSecurityGroup }}
         {{- end }}
         {{- if kindIs "bool" .Values.disableRestrictedSecurityGroupRules }}
-        - --disable-restricted-sg-rules={{ .Values.disableRestrictedSecurityGroupRules }}
+            - --disable-restricted-sg-rules={{ .Values.disableRestrictedSecurityGroupRules }}
         {{- end }}
         {{- if .Values.controllerConfig.featureGates }}
-        - --feature-gates={{ include "aws-load-balancer-controller.convertMapToCsv" .Values.controllerConfig.featureGates | trimSuffix "," }}
+            - --feature-gates={{ include "aws-load-balancer-controller.convertMapToCsv" .Values.controllerConfig.featureGates | trimSuffix "," }}
         {{- end }}
         {{- if ne .Values.defaultTargetType "instance" }}
-        - --default-target-type={{ .Values.defaultTargetType }}
+            - --default-target-type={{ .Values.defaultTargetType }}
         {{- end }}
         {{- if .Values.serviceTargetENISGTags }}
-        - --service-target-eni-security-group-tags={{ .Values.serviceTargetENISGTags }}
+            - --service-target-eni-security-group-tags={{ .Values.serviceTargetENISGTags }}
         {{- end }}
         {{- if .Values.certDiscovery.allowedCertificateAuthorityARNs }}
-        - --allowed-certificate-authority-arns={{ .Values.certDiscovery.allowedCertificateAuthorityARNs }}
+            - --allowed-certificate-authority-arns={{ .Values.certDiscovery.allowedCertificateAuthorityARNs }}
         {{- end }}
         {{- if .Values.loadBalancerClass }}
-        - --load-balancer-class={{ .Values.loadBalancerClass }}
+            - --load-balancer-class={{ .Values.loadBalancerClass }}
         {{- end }}
         {{- if .Values.vpcTags }}
-        - --aws-vpc-tags={{ include "aws-load-balancer-controller.convertMapToCsv" .Values.vpcTags | trimSuffix "," }}
+            - --aws-vpc-tags={{ include "aws-load-balancer-controller.convertMapToCsv" .Values.vpcTags | trimSuffix "," }}
         {{- end }}
         {{- if or .Values.env .Values.envSecretName }}
-        env:
+          env:
         {{- if .Values.env}}
         {{- range $key, $value := .Values.env }}
-        - name: {{ $key }}
-          value: "{{ $value }}"
+            - name: {{ $key }}
+              value: "{{ $value }}"
         {{- end }}
         {{- end }}
         {{- if .Values.envSecretName  }}
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.envSecretName }}
-              key: key_id
-              optional: true
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.envSecretName }}
-              key: access_key
-              optional: true
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.envSecretName }}
+                  key: key_id
+                  optional: true
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.envSecretName }}
+                  key: access_key
+                  optional: true
         {{- end }}
         {{- end }}
         {{- if .Values.envFrom }}
-        envFrom:
+          envFrom:
         {{- toYaml .Values.envFrom | nindent 10 }}
         {{- end }}
-        securityContext:
+          securityContext:
           {{- toYaml .Values.securityContext | nindent 10 }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        volumeMounts:
-        - mountPath: /tmp/k8s-webhook-server/serving-certs
-          name: cert
-          readOnly: true
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
         {{- with .Values.extraVolumeMounts }}
         {{ toYaml . | nindent 8 }}
         {{- end }}
-        ports:
-        - name: webhook-server
-          containerPort: {{ .Values.webhookBindPort | default 9443 }}
-          protocol: TCP
-        - name: metrics-server
-          containerPort: {{ (split ":" .Values.metricsBindAddr)._1 | default 8080 }}
-          protocol: TCP
-        resources:
+          ports:
+            - name: webhook-server
+              containerPort: {{ .Values.webhookBindPort | default 9443 }}
+              protocol: TCP
+            - name: metrics-server
+              containerPort: {{ (split ":" .Values.metricsBindAddr)._1 | default 8080 }}
+              protocol: TCP
+          resources:
           {{- toYaml .Values.resources | nindent 10 }}
         {{- with .Values.livenessProbe }}
-        livenessProbe:
+          livenessProbe:
           {{- toYaml . | nindent 10 }}
         {{- end }}
         {{- with .Values.readinessProbe }}
-        readinessProbe:
+          readinessProbe:
           {{- toYaml . | nindent 10 }}
         {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
@@ -248,15 +248,15 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app.kubernetes.io/name
-                  operator: In
-                  values:
-                  - {{ include "aws-load-balancer-controller.name" . }}
-              topologyKey: kubernetes.io/hostname
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - {{ include "aws-load-balancer-controller.name" . }}
+                topologyKey: kubernetes.io/hostname
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:

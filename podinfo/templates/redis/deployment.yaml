@@ -58,7 +58,7 @@ spec:
               name: config
       volumes:
         - name: data
-          emptyDir: {}
+          emptyDir: { }
         - name: config
           configMap:
             name: {{ template "podinfo.fullname" . }}-redis

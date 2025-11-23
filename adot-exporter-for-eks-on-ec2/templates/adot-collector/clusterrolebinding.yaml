@@ -7,9 +7,9 @@ metadata:
   labels:
     {{- include "adotCollector.daemonSet.labels" . | indent 4 }}
 subjects:
-- kind: ServiceAccount
-  name: {{ .Values.adotCollector.daemonSet.serviceAccount.name }}
-  namespace: {{ include "adotCollector.daemonSet.namespace" . }}
+  - kind: ServiceAccount
+    name: {{ .Values.adotCollector.daemonSet.serviceAccount.name }}
+    namespace: {{ include "adotCollector.daemonSet.namespace" . }}
 roleRef:
   kind: ClusterRole
   name: {{ .Values.adotCollector.daemonSet.clusterRoleName }}

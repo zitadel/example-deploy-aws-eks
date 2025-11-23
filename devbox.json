@@ -10,7 +10,7 @@
     "tflint@latest"
   ],
   "env": {
-    "AWS_PROFILE":        "zitadel",
+    "AWS_PROFILE": "zitadel",
     "AWS_DEFAULT_REGION": "us-east-1"
   }
 }

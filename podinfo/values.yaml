@@ -4,7 +4,7 @@ replicaCount: 1
 logLevel: info
 host: #0.0.0.0
 backend: #http://backend-podinfo:9898/echo
-backends: []
+backends: [ ]
 
 image:
   repository: ghcr.io/stefanprodan/podinfo
@@ -28,7 +28,7 @@ faults:
 # Kubernetes Service settings
 service:
   enabled: true
-  annotations: {}
+  annotations: { }
   type: ClusterIP
   metricsPort: 9797
   httpPort: 9898
@@ -53,7 +53,7 @@ config:
   name: ""
 
 # Additional command line arguments to pass to podinfo container
-extraArgs: []
+extraArgs: [ ]
 
 # enable tls on the podinfo service
 tls:
@@ -106,27 +106,27 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name:
   # List of image pull secrets if pulling from private registries
-  imagePullSecrets: []
+  imagePullSecrets: [ ]
 
 # set container security context
-securityContext: {}
+securityContext: { }
 
 # set pod security context
-podSecurityContext: {}
+podSecurityContext: { }
 
 ingress:
   enabled: false
   className: ""
-  additionalLabels: {}
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  additionalLabels: { }
+  annotations: { }
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
   hosts:
     - host: podinfo.local
       paths:
         - path: /
           pathType: ImplementationSpecific
-  tls: []
+  tls: [ ]
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
@@ -139,7 +139,7 @@ linkerd:
 serviceMonitor:
   enabled: false
   interval: 15s
-  additionalLabels: {}
+  additionalLabels: { }
 
 resources:
   limits:
@@ -148,26 +148,26 @@ resources:
     memory: 16Mi
 
 # Extra environment variables for the podinfo container
-extraEnvs: []
+extraEnvs: [ ]
 # Example on how to configure extraEnvs
 #  - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
 #    value: "http://otel:4317"
 #  - name: MULTIPLE_VALUES
 #    value: TEST
 
-nodeSelector: {}
+nodeSelector: { }
 
-tolerations: []
+tolerations: [ ]
 
-affinity: {}
+affinity: { }
 
-podAnnotations: {}
+podAnnotations: { }
 
 # https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
-topologySpreadConstraints: []
+topologySpreadConstraints: [ ]
 
 # Disruption budget will be configured only when the replicaCount is greater than 1
-podDisruptionBudget: {}
+podDisruptionBudget: { }
 #  maxUnavailable: 1
 
 # https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes

@@ -5,10 +5,10 @@ description: A Helm chart for collecting metrics using ADOT Collector to send to
 home: https://github.com/aws-observability/aws-otel-helm-charts/adot-exporter-for-eks-on-ec2
 kubeVersion: '>=1.19.0-0'
 maintainers:
-- email: bryaag@amazon.com
-  name: Bryan Aguilar
+  - email: bryaag@amazon.com
+    name: Bryan Aguilar
 name: adot-exporter-for-eks-on-ec2
 sources:
-- https://github.com/aws-observability/aws-otel-helm-charts/adot-exporter-for-eks-on-ec2
+  - https://github.com/aws-observability/aws-otel-helm-charts/adot-exporter-for-eks-on-ec2
 type: application
 version: 0.22.0

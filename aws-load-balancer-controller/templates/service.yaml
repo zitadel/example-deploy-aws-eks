@@ -34,8 +34,8 @@ metadata:
     prometheus.io/service-monitor: "false"
 spec:
   ports:
-  - port: 443
-    name: webhook-server
-    targetPort: webhook-server
+    - port: 443
+      name: webhook-server
+      targetPort: webhook-server
   selector:
     {{- include "aws-load-balancer-controller.selectorLabels" . | nindent 4 }}
