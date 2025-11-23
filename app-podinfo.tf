@@ -1,3 +1,4 @@
+// file: app-podinfo.tf
 resource "helm_release" "podinfo" {
   count = var.deploy_post ? 1 : 0
 
@@ -57,10 +58,10 @@ resource "helm_release" "podinfo" {
   depends_on = [helm_release.aws_load_balancer_controller, aws_acm_certificate_validation.wildcard]
 }
 
-resource "kubernetes_manifest" "podinfo_grpc_ingress" {
+resource "kubectl_manifest" "podinfo_grpc_ingress" {
   count = var.deploy_post ? 1 : 0
 
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "networking.k8s.io/v1"
     kind       = "Ingress"
     metadata = {
@@ -99,9 +100,9 @@ resource "kubernetes_manifest" "podinfo_grpc_ingress" {
         }
       ]
     }
-  }
+  })
 
-  depends_on = [helm_release.podinfo]
+  depends_on = [helm_release.podinfo, time_sleep.post_cluster_pause]
 }
 
 data "kubernetes_ingress_v1" "podinfo_ingress" {

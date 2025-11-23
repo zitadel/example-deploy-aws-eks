@@ -44,22 +44,22 @@ resource "helm_release" "aws_load_balancer_controller" {
   depends_on = [module.lb_irsa]
 }
 
-resource "kubernetes_manifest" "alb_bootstrap" {
+resource "kubectl_manifest" "alb_bootstrap" {
   count = var.deploy_post ? 1 : 0
 
-  manifest = {
+  yaml_body = yamlencode({
     apiVersion = "networking.k8s.io/v1"
     kind       = "Ingress"
     metadata = {
       name      = "alb-bootstrap"
       namespace = "kube-system"
       annotations = {
-        "alb.ingress.kubernetes.io/group.name"      = "podinfo"
-        "alb.ingress.kubernetes.io/scheme"          = "internet-facing"
-        "alb.ingress.kubernetes.io/target-type"     = "ip"
-        "alb.ingress.kubernetes.io/subnets"         = join(",", local.two_public_subnets)
-        "alb.ingress.kubernetes.io/listen-ports"    = "[{\"HTTP\":80},{\"HTTPS\":443}]"
-        "alb.ingress.kubernetes.io/certificate-arn" = aws_acm_certificate.wildcard.arn
+        "alb.ingress.kubernetes.io/group.name"           = "podinfo"
+        "alb.ingress.kubernetes.io/scheme"               = "internet-facing"
+        "alb.ingress.kubernetes.io/target-type"          = "ip"
+        "alb.ingress.kubernetes.io/subnets"              = join(",", local.two_public_subnets)
+        "alb.ingress.kubernetes.io/listen-ports"         = "[{\"HTTP\":80},{\"HTTPS\":443}]"
+        "alb.ingress.kubernetes.io/certificate-arn"      = aws_acm_certificate.wildcard.arn
         "alb.ingress.kubernetes.io/actions.health-check" = jsonencode({
           type = "fixed-response"
           fixedResponseConfig = {
@@ -92,9 +92,13 @@ resource "kubernetes_manifest" "alb_bootstrap" {
         }
       ]
     }
-  }
+  })
 
-  depends_on = [helm_release.aws_load_balancer_controller, aws_acm_certificate_validation.wildcard]
+  depends_on = [
+    helm_release.aws_load_balancer_controller,
+    aws_acm_certificate_validation.wildcard,
+    time_sleep.post_cluster_pause
+  ]
 }
 
 data "kubernetes_ingress_v1" "alb_bootstrap" {
@@ -105,7 +109,7 @@ data "kubernetes_ingress_v1" "alb_bootstrap" {
     namespace = "kube-system"
   }
 
-  depends_on = [kubernetes_manifest.alb_bootstrap]
+  depends_on = [kubectl_manifest.alb_bootstrap]
 }
 
 output "alb_bootstrap_hostname" {

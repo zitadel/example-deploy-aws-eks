@@ -24,3 +24,12 @@ Should point to AWS.
 terraform login
 
 terraform init
+
+
+
+Caveats:
+
+1. No Argo Flux
+2. Destroyiing the cluser take a while
+3. Hosted zone is not deleted abnd not tf managed.
+4. Need to use 
