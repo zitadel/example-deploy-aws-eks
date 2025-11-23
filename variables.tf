@@ -24,3 +24,8 @@ variable "wildcard_domain" {
   description = "Wildcard domain for ACM certificate (e.g., *.aws.mrida.ng)"
   type        = string
 }
+variable "zitadel_domain" {
+  description = "Domain name for Zitadel"
+  type        = string
+  default     = "zitadel.aws.mrida.ng"
+}
