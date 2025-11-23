@@ -10,6 +10,9 @@ module "zitadel" {
   alb_group_name  = "podinfo"
   otlp_endpoint   = "http://adot-collector-daemonset-service.amazon-cloudwatch.svc.cluster.local:4317"
 
+  vpc_id                     = data.aws_vpc.default.id
+  eks_node_security_group_id = module.eks.node_security_group_id
+
   common_tags = local.common_tags
 
   depends_on = [
@@ -21,4 +24,14 @@ module "zitadel" {
 
 output "zitadel_url" {
   value = var.deploy_post ? "https://${var.zitadel_domain}" : "Not deployed"
+}
+
+output "zitadel_rds_endpoint" {
+  description = "Zitadel RDS endpoint"
+  value       = var.deploy_post ? module.zitadel[0].rds_endpoint : "Not deployed"
+}
+
+output "zitadel_db_secret_arn" {
+  description = "Zitadel DB credentials secret ARN"
+  value       = var.deploy_post ? module.zitadel[0].secrets_manager_secret_arn : "Not deployed"
 }

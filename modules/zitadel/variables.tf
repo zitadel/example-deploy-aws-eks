@@ -80,3 +80,44 @@ variable "common_tags" {
   type        = map(string)
   default     = {}
 }
+
+# RDS variables
+variable "vpc_id" {
+  description = "VPC ID for RDS"
+  type        = string
+}
+
+variable "eks_node_security_group_id" {
+  description = "EKS node security group ID for RDS access"
+  type        = string
+}
+
+variable "db_instance_class" {
+  description = "RDS instance class"
+  type        = string
+  default     = "db.t3.micro"
+}
+
+variable "db_allocated_storage" {
+  description = "Allocated storage in GB"
+  type        = number
+  default     = 20
+}
+
+variable "db_engine_version" {
+  description = "PostgreSQL engine version"
+  type        = string
+  default     = "15"
+}
+
+variable "db_name" {
+  description = "Database name"
+  type        = string
+  default     = "zitadel"
+}
+
+variable "db_master_username" {
+  description = "Master username"
+  type        = string
+  default     = "postgres"
+}
