@@ -1,13 +1,3 @@
-variable "route53_zone_id" {
-  description = "Route53 hosted zone ID for the subdomain"
-  type        = string
-}
-
-variable "app_domain" {
-  description = "Domain name for the application"
-  type        = string
-}
-
 data "aws_route53_zone" "subdomain" {
   zone_id = var.route53_zone_id
 }

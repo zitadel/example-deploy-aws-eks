@@ -1,9 +1,3 @@
-variable "deploy_post" {
-  description = "Install AWS Load Balancer Controller and Podinfo app with ALB Ingress"
-  type        = bool
-  default     = true
-}
-
 data "aws_region" "current" {}
 
 module "lb_irsa" {

@@ -1,8 +1,3 @@
-variable "wildcard_domain" {
-  description = "Wildcard domain for ACM certificate (e.g., *.aws.mrida.ng)"
-  type        = string
-}
-
 resource "aws_acm_certificate" "wildcard" {
   domain_name       = var.wildcard_domain
   validation_method = "DNS"
