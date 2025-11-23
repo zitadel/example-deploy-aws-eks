@@ -1,0 +1,4 @@
+.devbox/
+.terraform/
+*.tfstate*
+.git/

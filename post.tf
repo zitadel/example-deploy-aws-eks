@@ -1,7 +1,7 @@
 variable "deploy_post" {
-  description = "Install AWS Load Balancer Controller and Hello World app with ALB Ingress"
+  description = "Install AWS Load Balancer Controller and Podinfo app with ALB Ingress"
   type        = bool
-  default     = false
+  default     = true
 }
 
 data "aws_region" "current" {}
@@ -140,6 +140,9 @@ resource "helm_release" "adot_collector" {
       region      = data.aws_region.current.name
 
       adotCollector = {
+        image = {
+          tag = "v0.45.1"
+        }
         daemonSet = {
           createNamespace = false
           namespace       = "amazon-cloudwatch"
@@ -152,7 +155,7 @@ resource "helm_release" "adot_collector" {
           }
           service = {
             metrics = {
-              receivers  = ["awscontainerinsightreceiver"]
+              receivers  = ["awscontainerinsightreceiver", "prometheus"]
               processors = ["batch/metrics"]
               exporters  = ["awsemf"]
             }
@@ -166,11 +169,11 @@ resource "helm_release" "adot_collector" {
   depends_on = [module.adot_irsa]
 }
 
-resource "helm_release" "hello_world" {
+resource "helm_release" "podinfo" {
   count = var.deploy_post ? 1 : 0
 
-  name             = "hello-world"
-  chart            = "./nginx"
+  name             = "podinfo"
+  chart            = "./podinfo"
   namespace        = "hello"
   create_namespace = true
   wait             = true
@@ -179,21 +182,45 @@ resource "helm_release" "hello_world" {
   values = [
     yamlencode({
       service = {
-        type = "ClusterIP"
+        type         = "ClusterIP"
+        httpPort     = 9898
+        externalPort = 9898
+        grpcPort     = 9999
       }
+      extraEnvs = [
+        {
+          name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
+          value = "adot-collector-daemonset-service.amazon-cloudwatch.svc.cluster.local:4317"
+        }
+      ]
+      extraArgs = [
+        "--otel-service-name=podinfo"
+      ]
       ingress = {
-        enabled          = true
-        hostname         = ""
-        ingressClassName = "alb"
+        enabled   = true
+        className = "alb"
         annotations = {
+          "alb.ingress.kubernetes.io/group.name"       = "podinfo"
           "alb.ingress.kubernetes.io/scheme"           = "internet-facing"
           "alb.ingress.kubernetes.io/target-type"      = "ip"
-          "alb.ingress.kubernetes.io/healthcheck-path" = "/"
+          "alb.ingress.kubernetes.io/healthcheck-path" = "/healthz"
           "alb.ingress.kubernetes.io/listen-ports"     = "[{\"HTTP\":80},{\"HTTPS\":443}]"
           "alb.ingress.kubernetes.io/ssl-redirect"     = "443"
           "alb.ingress.kubernetes.io/certificate-arn"  = aws_acm_certificate.alb_cert[0].arn
-          "alb.ingress.kubernetes.io/subnets" = join(",", local.two_public_subnets)
+          "alb.ingress.kubernetes.io/subnets"          = join(",", local.two_public_subnets)
+          "alb.ingress.kubernetes.io/backend-protocol" = "HTTP"
         }
+        hosts = [
+          {
+            host = ""
+            paths = [
+              {
+                path     = "/"
+                pathType = "Prefix"
+              }
+            ]
+          }
+        ]
       }
     })
   ]
@@ -201,23 +228,70 @@ resource "helm_release" "hello_world" {
   depends_on = [helm_release.aws_load_balancer_controller]
 }
 
-data "kubernetes_ingress_v1" "hello_ingress" {
+resource "kubernetes_manifest" "podinfo_grpc_ingress" {
+  count = var.deploy_post ? 1 : 0
+
+  manifest = {
+    apiVersion = "networking.k8s.io/v1"
+    kind       = "Ingress"
+    metadata = {
+      name      = "podinfo-grpc"
+      namespace = "hello"
+      annotations = {
+        "alb.ingress.kubernetes.io/group.name"               = "podinfo"
+        "alb.ingress.kubernetes.io/scheme"                   = "internet-facing"
+        "alb.ingress.kubernetes.io/target-type"              = "ip"
+        "alb.ingress.kubernetes.io/backend-protocol-version" = "HTTP2"
+        "alb.ingress.kubernetes.io/listen-ports"             = "[{\"HTTPS\":8443}]"
+        "alb.ingress.kubernetes.io/certificate-arn"          = aws_acm_certificate.alb_cert[0].arn
+        "alb.ingress.kubernetes.io/subnets"                  = join(",", local.two_public_subnets)
+      }
+    }
+    spec = {
+      ingressClassName = "alb"
+      rules = [
+        {
+          http = {
+            paths = [
+              {
+                path     = "/"
+                pathType = "Prefix"
+                backend = {
+                  service = {
+                    name = "podinfo"
+                    port = {
+                      number = 9999
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+
+  depends_on = [helm_release.podinfo]
+}
+
+data "kubernetes_ingress_v1" "podinfo_ingress" {
   count = var.deploy_post ? 1 : 0
 
   metadata {
-    name      = "hello-world-nginx"
+    name      = "podinfo"
     namespace = "hello"
   }
 
-  depends_on = [helm_release.hello_world]
+  depends_on = [helm_release.podinfo]
 }
 
 output "alb_hostname" {
-  description = "ALB DNS name for the hello Ingress"
-  value       = try(data.kubernetes_ingress_v1.hello_ingress[0].status[0].load_balancer[0].ingress[0].hostname, "<pending>")
+  description = "ALB DNS name for the podinfo Ingress"
+  value       = try(data.kubernetes_ingress_v1.podinfo_ingress[0].status[0].load_balancer[0].ingress[0].hostname, "<pending>")
 }
 
 output "curl_example" {
   description = "Test command for the ALB"
-  value       = format("curl -sS http://%s", try(data.kubernetes_ingress_v1.hello_ingress[0].status[0].load_balancer[0].ingress[0].hostname, "ALB_HOSTNAME"))
+  value       = format("curl -sS http://%s", try(data.kubernetes_ingress_v1.podinfo_ingress[0].status[0].load_balancer[0].ingress[0].hostname, "ALB_HOSTNAME"))
 }

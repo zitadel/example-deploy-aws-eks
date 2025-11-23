@@ -1,0 +1,31 @@
+{{- if .Values.adotCollector.daemonSet.enabled }}
+# Service for ADOT Collector OTLP endpoints
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.adotCollector.daemonSet.serviceName | default (printf "%s-service" .Values.adotCollector.daemonSet.daemonSetName) }}
+  namespace: {{ .Values.adotCollector.daemonSet.namespace }}
+  labels:
+    {{- include "adotCollector.daemonSet.labels" . | indent 4 }}
+  {{- if .Values.adotCollector.daemonSet.k8sService.annotations }}
+  annotations:
+    {{- toYaml .Values.adotCollector.daemonSet.k8sService.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.adotCollector.daemonSet.k8sService.type | default "ClusterIP" }}
+  selector:
+    name: {{ .Values.adotCollector.daemonSet.daemonSetName }}
+    {{- include "adotCollector.daemonSet.selectorLabels" . | indent 4 }}
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+  {{- if .Values.adotCollector.daemonSet.k8sService.clusterIP }}
+  clusterIP: {{ .Values.adotCollector.daemonSet.k8sService.clusterIP }}
+  {{- end }}
+{{- end }}

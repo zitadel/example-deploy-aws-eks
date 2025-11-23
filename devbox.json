@@ -5,7 +5,8 @@
     "awscli2@latest",
     "ssm-session-manager-plugin@latest",
     "kubectl@latest",
-    "kubernetes-helm@latest"
+    "kubernetes-helm@latest",
+    "grpcurl@latest"
   ],
   "env": {
     "AWS_PROFILE":        "zitadel",

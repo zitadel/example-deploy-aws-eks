@@ -17,7 +17,7 @@ data:
         region: {{ .Values.awsRegion }}
     receivers:
       awscontainerinsightreceiver:
-        collection_interval: {{ .Values.adotCollector.daemonSet.cwreceivers.collectionInterval }}
+        collection_interval: 60s
         container_orchestrator: {{ .Values.adotCollector.daemonSet.cwreceivers.containerOrchestrator }}
         add_service_as_attribute: {{ .Values.adotCollector.daemonSet.cwreceivers.addServiceAsAttribute }}
         prefer_full_pod_name: {{ .Values.adotCollector.daemonSet.cwreceivers.preferFullPodName }}
@@ -29,9 +29,18 @@ data:
             scrape_timeout: {{ .Values.adotCollector.daemonSet.ampreceivers.scrapeTimeout }}
           scrape_configs: 
             {{ .Values.adotCollector.daemonSet.ampreceivers.scrapeConfigs | nindent 12 }}
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
     processors:
       batch/metrics:
         timeout: {{ .Values.adotCollector.daemonSet.processors.timeout }}
+      batch/traces:
+        timeout: 1s
+        send_batch_size: 50
     exporters:
       awsemf:
         namespace: {{ .Values.adotCollector.daemonSet.cwexporters.namespace }}
@@ -52,9 +61,18 @@ data:
           enabled: {{ .Values.adotCollector.daemonSet.ampexporters.resourcetootel }}
         auth:
           authenticator: {{ .Values.adotCollector.daemonSet.ampexporters.authenticator }}
+      awsxray:
+        region: {{ .Values.awsRegion }}
         
     service:
       pipelines:
+        traces:
+          receivers:
+          - otlp
+          processors:
+          - batch/traces
+          exporters:
+          - awsxray
         metrics:
           receivers: {{- range .Values.adotCollector.daemonSet.service.metrics.receivers }}
           - {{.}} {{- end }}

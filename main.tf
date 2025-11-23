@@ -1,4 +1,6 @@
 terraform {
+
+
   required_version = ">= 1.6.0"
 
   required_providers {
@@ -148,10 +150,12 @@ resource "time_sleep" "post_cluster_pause" {
 
 data "aws_eks_cluster" "this" {
   name = module.eks.cluster_name
+  depends_on = [module.eks]
 }
 
 data "aws_eks_cluster_auth" "this" {
   name = module.eks.cluster_name
+  depends_on = [module.eks]
 }
 
 provider "kubernetes" {

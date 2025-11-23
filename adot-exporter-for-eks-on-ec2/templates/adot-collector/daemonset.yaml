@@ -24,17 +24,39 @@ spec:
         - name: {{ .Values.adotCollector.daemonSet.containersName }}
           image: "{{ .Values.adotCollector.image.repository }}:{{ .Values.adotCollector.image.tag }}"
           imagePullPolicy: {{ .Values.adotCollector.image.daemonSetPullPolicy }}
+          ports:
+            - containerPort: 4317
+              name: otlp-grpc
+              protocol: TCP
+            - containerPort: 4318
+              name: otlp-http
+              protocol: TCP
           env:
             {{- toYaml .Values.adotCollector.daemonSet.env | nindent 12}}
           command:
             {{- toYaml .Values.adotCollector.daemonSet.command | nindent 12}}
           volumeMounts:
             {{- toYaml .Values.adotCollector.daemonSet.volumeMounts | nindent 12 }}
+            - name: kube-api-access
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
           resources:
             {{- toYaml .Values.adotCollector.daemonSet.resources | nindent 12 }}
       volumes:
-        {{- toYaml .Values.adotCollector.daemonSet.volumes | nindent 10 }}
+        {{- toYaml .Values.adotCollector.daemonSet.volumes | nindent 8 }}
+        - name: kube-api-access
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
       serviceAccountName: {{ .Values.adotCollector.daemonSet.serviceAccount.name  }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       tolerations:
         {{- toYaml .Values.adotCollector.daemonSet.tolerations | nindent 8 }}
 {{- end }}
