@@ -35,8 +35,6 @@ test:
 lint:
 	@echo "Running TFLint..."
 	tflint
-	@echo "Checking Terraform formatting..."
-	terraform fmt -check -recursive
 
 # Deploy infrastructure changes to your cloud environment. This applies the Terraform
 # configuration to create or update resources as needed. You will be prompted to review

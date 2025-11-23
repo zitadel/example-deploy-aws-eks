@@ -340,6 +340,54 @@
           "store_path": "/nix/store/sjbyjd98xm8k1q9mq5js7pv1g43660d9-terraform-1.13.4"
         }
       }
+    },
+    "tflint@latest": {
+      "last_modified": "2025-11-15T07:28:48Z",
+      "resolved": "github:NixOS/nixpkgs/1d4c88323ac36805d09657d13a5273aea1b34f0c#tflint",
+      "source": "devbox-search",
+      "version": "0.59.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/r670a47k92a48qhkl7bj34ln0a5yc5a3-tflint-0.59.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/r670a47k92a48qhkl7bj34ln0a5yc5a3-tflint-0.59.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/5jj24xp5qsx9b893y5v0zqp0rpizgvhz-tflint-0.59.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/5jj24xp5qsx9b893y5v0zqp0rpizgvhz-tflint-0.59.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/n1mqv9vxz2z3l0k57kgvxr8n843sxx1i-tflint-0.59.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/n1mqv9vxz2z3l0k57kgvxr8n843sxx1i-tflint-0.59.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/haggh7r5m42x1ba1r5fmcvqxfn7y42h5-tflint-0.59.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/haggh7r5m42x1ba1r5fmcvqxfn7y42h5-tflint-0.59.1"
+        }
+      }
     }
   }
 }
