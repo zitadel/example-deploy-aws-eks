@@ -12,7 +12,7 @@ image:
   pullPolicy: IfNotPresent
 
 runtimeClassName: ""
-imagePullSecrets: [ ]
+imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
@@ -31,7 +31,7 @@ serviceAccount:
   # Specifies whether a service account should be created
   create: true
   # Annotations to add to the service account
-  annotations: { }
+  annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name:
@@ -39,7 +39,7 @@ serviceAccount:
   automountServiceAccountToken: true
   # List of image pull secrets to add to the Service Account.
   imagePullSecrets:
-  # - name: docker
+    # - name: docker
 
 rbac:
   # Specifies whether rbac resources should be created
@@ -59,7 +59,7 @@ securityContext:
 # Time period for the controller pod to do a graceful shutdown
 terminationGracePeriodSeconds: 10
 
-resources: { }
+resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -68,19 +68,19 @@ resources: { }
   #   cpu: 100m
   #   memory: 128Mi
   # requests:
-#   cpu: 100m
-#   memory: 128Mi
+  #   cpu: 100m
+  #   memory: 128Mi
 
 # priorityClassName specifies the PriorityClass to indicate the importance of controller pods
 # ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
 priorityClassName: system-cluster-critical
 
-nodeSelector: { }
+nodeSelector: {}
 
-tolerations: [ ]
+tolerations: []
 
 # affinity specifies a custom affinity for the controller pods
-affinity: { }
+affinity: {}
 
 # configureDefaultAffinity specifies whether to configure a default affinity for the controller pods to prevent
 # co-location on the same node. This will get ignored if you specify a custom affinity configuration.
@@ -91,26 +91,26 @@ configureDefaultAffinity: true
 # nodes, and other user-defined topology domains.
 #
 # more details here: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
-topologySpreadConstraints: [ ]
+topologySpreadConstraints: []
 
-updateStrategy: { }
+updateStrategy: {}
   # type: RollingUpdate
   # rollingUpdate:
-#   maxSurge: 1
-#   maxUnavailable: 1
+  #   maxSurge: 1
+  #   maxUnavailable: 1
 
 # serviceAnnotations contains annotations to be added to the provisioned webhook service resource
-serviceAnnotations: { }
+serviceAnnotations: {}
 
 # deploymentAnnotations contains annotations for the controller deployment
-deploymentAnnotations: { }
+deploymentAnnotations: {}
 
-podAnnotations: { }
+podAnnotations: {}
 
-podLabels: { }
+podLabels: {}
 
 # additionalLabels -- Labels to add to each object of the chart.
-additionalLabels: { }
+additionalLabels: {}
 
 # Enable cert-manager
 enableCertManager: false
@@ -138,7 +138,7 @@ ingressClassParams:
   create: true
   # The name of ingressClassParams resource will be referred in ingressClass
   name:
-  spec: { }
+  spec: {}
     # Due to dependency issue, the validation webhook ignores this particular ingressClassParams resource.
     # We recommend creating ingressClassParams resources separately after installing this chart and the
     # controller is functional.
@@ -154,8 +154,8 @@ ingressClassParams:
     # ipAddressType:
     # tags:
     # loadBalancerAttributes:
-  # - key:
-  #   value:
+    # - key:
+    #   value:
 
 # To use IngressClass resource instead of annotation, before you need to install the IngressClass resource pointing to controller.
 # If specified as true, the IngressClass resource will be created.
@@ -168,7 +168,7 @@ region:
 vpcId:
 
 # This is alternative to vpcId. Set this when your pods are unable to use the metadata service to determine VPC automatically.
-vpcTags: { }
+vpcTags: {}
 # Name: tagValue
 
 # Custom AWS API Endpoints (serviceID1=URL1,serviceID2=URL2)
@@ -292,8 +292,8 @@ readinessProbe:
 # We strongly discourage programming access credentials in the controller environment. You should setup IRSA or
 # comparable solutions like kube2iam, kiam etc instead.
 env:
-# ENV_1: ""
-# ENV_2: ""
+  # ENV_1: ""
+  # ENV_2: ""
 
 # Use Environment variables credentials from Secret (aws-secret) for aws-load-balancer-controller pod similarly as The EBS CSI Driver does.
 # envSecretName: aws-secret
@@ -318,33 +318,33 @@ dnsPolicy:
 
 # extraVolumeMounts are the additional volume mounts. This enables setting up IRSA on non-EKS Kubernetes cluster
 extraVolumeMounts:
-# - name: aws-iam-token
-#   mountPath: /var/run/secrets/eks.amazonaws.com/serviceaccount
-#   readOnly: true
+  # - name: aws-iam-token
+  #   mountPath: /var/run/secrets/eks.amazonaws.com/serviceaccount
+  #   readOnly: true
 
 # extraVolumes for the extraVolumeMounts. Useful to mount a projected service account token for example.
 extraVolumes:
-# - name: aws-iam-token
-#   projected:
-#     defaultMode: 420
-#     sources:
-#     - serviceAccountToken:
-#         audience: sts.amazonaws.com
-#         expirationSeconds: 86400
-#         path: token
+  # - name: aws-iam-token
+  #   projected:
+  #     defaultMode: 420
+  #     sources:
+  #     - serviceAccountToken:
+  #         audience: sts.amazonaws.com
+  #         expirationSeconds: 86400
+  #         path: token
 
 # defaultTags are the tags to apply to all AWS resources managed by this controller
-defaultTags: { }
-# default_tag1: value1
-# default_tag2: value2
+defaultTags: {}
+  # default_tag1: value1
+  # default_tag2: value2
 
 # podDisruptionBudget specifies the disruption budget for the controller pods.
 # Disruption budget will be configured only when the replicaCount is greater than 1
-podDisruptionBudget: { }
+podDisruptionBudget: {}
 #  maxUnavailable: 1
 
 # externalManagedTags is the list of tag keys on AWS resources that will be managed externally
-externalManagedTags: [ ]
+externalManagedTags: []
 
 # enableEndpointSlices enables k8s EndpointSlices for IP targets instead of Endpoints (default false)
 enableEndpointSlices:
@@ -364,7 +364,7 @@ disableRestrictedSecurityGroupRules:
 # controllerConfig specifies controller configuration
 controllerConfig:
   # featureGates set of key: value pairs that describe AWS load balance controller features
-  featureGates: { }
+  featureGates: {}
   # ListenerRulesTagging: true
   # WeightedTargetGroups: true
   # ServiceTypeLoadBalancerOnly: false
@@ -398,7 +398,7 @@ serviceMonitor:
   # Namespace to create the service monitor in
   namespace:
   # Labels to add to the service monitor
-  additionalLabels: { }
+  additionalLabels: {}
   # Prometheus scrape interval
   interval: 1m
   # Prometheus scrape timeout
@@ -430,16 +430,16 @@ serviceMutatorWebhookConfig:
   failurePolicy: Fail
   # limit webhook to only mutate services matching the objectSelector
   objectSelector:
-    matchExpressions: [ ]
+    matchExpressions: []
     # - key: <key>
     #   operator: <operator>
     #   values:
     #   - <value>
-    matchLabels: { }
-    # key: value
+    matchLabels: {}
+      # key: value
   # which operations trigger the webhook
   operations:
-    - CREATE
+  - CREATE
     # - UPDATE
 
 # podMutatorWebhookConfig contains configurations specific to the service mutator webhook

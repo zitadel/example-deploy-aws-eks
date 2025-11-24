@@ -99,20 +99,20 @@ spec:
             {{- end }}
           env:
           {{- if .Values.ui.message }}
-            - name: PODINFO_UI_MESSAGE
-              value: {{ quote .Values.ui.message }}
+          - name: PODINFO_UI_MESSAGE
+            value: {{ quote .Values.ui.message }}
           {{- end }}
           {{- if .Values.ui.logo }}
-            - name: PODINFO_UI_LOGO
-              value: {{ .Values.ui.logo }}
+          - name: PODINFO_UI_LOGO
+            value: {{ .Values.ui.logo }}
           {{- end }}
           {{- if .Values.ui.color }}
-            - name: PODINFO_UI_COLOR
-              value: {{ quote .Values.ui.color }}
+          - name: PODINFO_UI_COLOR
+            value: {{ quote .Values.ui.color }}
           {{- end }}
           {{- if .Values.backend }}
-            - name: PODINFO_BACKEND_URL
-              value: {{ .Values.backend }}
+          - name: PODINFO_BACKEND_URL
+            value: {{ .Values.backend }}
           {{- end }}
           {{- if .Values.extraEnvs }}
 {{ toYaml .Values.extraEnvs | indent 10 }}
@@ -146,10 +146,10 @@ spec:
           startupProbe:
             exec:
               command:
-                - podcli
-                - check
-                - http
-                - localhost:{{ .Values.service.httpPort | default 9898 }}/healthz
+              - podcli
+              - check
+              - http
+              - localhost:{{ .Values.service.httpPort | default 9898 }}/healthz
             {{- with .Values.probes.startup }}
             initialDelaySeconds: {{ .initialDelaySeconds | default 1 }}
             timeoutSeconds: {{ .timeoutSeconds | default 5 }}
@@ -161,10 +161,10 @@ spec:
           livenessProbe:
             exec:
               command:
-                - podcli
-                - check
-                - http
-                - localhost:{{ .Values.service.httpPort | default 9898 }}/healthz
+              - podcli
+              - check
+              - http
+              - localhost:{{ .Values.service.httpPort | default 9898 }}/healthz
             {{- with .Values.probes.liveness }}
             initialDelaySeconds: {{ .initialDelaySeconds | default 1 }}
             timeoutSeconds: {{ .timeoutSeconds | default 5 }}
@@ -175,10 +175,10 @@ spec:
           readinessProbe:
             exec:
               command:
-                - podcli
-                - check
-                - http
-                - localhost:{{ .Values.service.httpPort | default 9898 }}/readyz
+              - podcli
+              - check
+              - http
+              - localhost:{{ .Values.service.httpPort | default 9898 }}/readyz
             {{- with .Values.probes.readiness }}
             initialDelaySeconds: {{ .initialDelaySeconds | default 1 }}
             timeoutSeconds: {{ .timeoutSeconds | default 5 }}
@@ -187,12 +187,12 @@ spec:
             periodSeconds: {{ .periodSeconds | default 10 }}
             {{- end }}
           volumeMounts:
-            - name: data
-              mountPath: /data
+          - name: data
+            mountPath: /data
           {{- if .Values.tls.enabled }}
-            - name: tls
-              mountPath: {{ .Values.tls.certPath | default "/data/cert" }}
-              readOnly: true
+          - name: tls
+            mountPath: {{ .Values.tls.certPath | default "/data/cert" }}
+            readOnly: true
           {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
@@ -213,12 +213,12 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
       volumes:
-        - name: data
-          emptyDir: { }
+      - name: data
+        emptyDir: {}
       {{- if .Values.tls.enabled }}
-        - name: tls
-          secret:
-            secretName: {{ template "podinfo.tlsSecretName" . }}
+      - name: tls
+        secret:
+          secretName: {{ template "podinfo.tlsSecretName" . }}
       {{- end }}
     {{- with .Values.topologySpreadConstraints }}
       topologySpreadConstraints:

@@ -51,7 +51,7 @@ The command removes all the Kubernetes components associated with the chart and 
 The following tables lists the configurable parameters of the podinfo chart and their default values.
 
 | Parameter                         | Default                | Description                                                                                                            |
-|-----------------------------------|------------------------|------------------------------------------------------------------------------------------------------------------------|
+| --------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `replicaCount`                    | `1`                    | Desired number of pods                                                                                                 |
 | `logLevel`                        | `info`                 | Log level: `debug`, `info`, `warn`, `error`                                                                            |
 | `backend`                         | `None`                 | Echo backend URL                                                                                                       |
@@ -98,7 +98,7 @@ The following tables lists the configurable parameters of the podinfo chart and 
 | `serviceMonitor.interval`         | `15s`                  | Prometheus scraping interval                                                                                           |
 | `serviceMonitor.additionalLabels` | `{}`                   | Add additional labels to the service monitor                                                                           |
 | `ingress.enabled`                 | `false`                | Enables Ingress                                                                                                        |
-| `ingress.className`               | `""`                   | Use ingressClassName                                                                                                   |
+| `ingress.className`               | `""`                    | Use ingressClassName                                                                                                  |
 | `ingress.additionalLabels`        | `{}`                   | Add additional labels to the ingress                                                                                   |
 | `ingress.annotations`             | `{}`                   | Ingress annotations                                                                                                    |
 | `ingress.hosts`                   | `[]`                   | Ingress accepted hosts                                                                                                 |
@@ -126,8 +126,7 @@ $ helm upgrade -i my-release podinfo/podinfo \
 --set podAnnotations."appmesh\.k8s\.aws\/preview"=enabled
 ```
 
-Alternatively, a YAML file that specifies the values for the above parameters can be provided while installing the
-chart. For example,
+Alternatively, a YAML file that specifies the values for the above parameters can be provided while installing the chart. For example,
 
 ```console
 $ helm install my-release podinfo/podinfo -f values.yaml

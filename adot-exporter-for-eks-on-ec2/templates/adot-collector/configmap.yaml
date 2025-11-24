@@ -10,7 +10,7 @@ metadata:
     component: {{ .Values.adotCollector.daemonSet.configMap.component }}
     {{- include "adotCollector.daemonSet.labels" . | indent 4 }}
 data:
-  adot-config: |
+  adot-config:  |
     extensions:
       health_check: {{ .Values.adotCollector.daemonSet.extensions.healthCheck }}
       sigv4auth:
@@ -63,7 +63,7 @@ data:
           authenticator: {{ .Values.adotCollector.daemonSet.ampexporters.authenticator }}
       awsxray:
         region: {{ .Values.awsRegion }}
-
+        
     service:
       pipelines:
         traces:
