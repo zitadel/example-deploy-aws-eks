@@ -60,3 +60,28 @@ variable "node_max_size" {
   type        = number
   default     = 3
 }
+
+variable "zitadel_masterkey" {
+  description = "Zitadel master key (must be exactly 32 characters)"
+  type        = string
+  sensitive   = true
+}
+
+variable "zitadel_admin_username" {
+  description = "Initial Zitadel admin username"
+  type        = string
+  default     = "zitadel-admin"
+}
+
+variable "zitadel_admin_password" {
+  description = "Initial Zitadel admin password"
+  type        = string
+  sensitive   = true
+  default     = "Password1!"
+}
+
+variable "zitadel_admin_email" {
+  description = "Initial Zitadel admin email"
+  type        = string
+  default     = "admin@localhost"
+}

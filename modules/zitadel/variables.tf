@@ -9,7 +9,7 @@ variable "cluster_name" {
 }
 
 variable "domain" {
-  description = "Domain name for Zitadel (e.g., zitadel.aws.mrida.ng)"
+  description = "Domain name for Zitadel"
   type        = string
 }
 
@@ -33,12 +33,6 @@ variable "otlp_endpoint" {
   type        = string
 }
 
-variable "otlp_service_name" {
-  description = "Service name for OTLP traces"
-  type        = string
-  default     = "zitadel"
-}
-
 variable "alb_scheme" {
   description = "ALB scheme"
   type        = string
@@ -49,24 +43,6 @@ variable "alb_target_type" {
   description = "ALB target type"
   type        = string
   default     = "ip"
-}
-
-variable "service_http_port" {
-  description = "HTTP service port"
-  type        = number
-  default     = 9898
-}
-
-variable "service_grpc_port" {
-  description = "gRPC service port"
-  type        = number
-  default     = 9999
-}
-
-variable "healthcheck_path" {
-  description = "Health check path"
-  type        = string
-  default     = "/healthz"
 }
 
 variable "ingress_class" {
@@ -81,7 +57,6 @@ variable "common_tags" {
   default     = {}
 }
 
-# RDS variables
 variable "vpc_id" {
   description = "VPC ID for RDS"
   type        = string
@@ -120,4 +95,46 @@ variable "db_master_username" {
   description = "Master username"
   type        = string
   default     = "postgres"
+}
+
+variable "zitadel_masterkey" {
+  description = "Zitadel master key (must be exactly 32 characters)"
+  type        = string
+  sensitive   = true
+
+  validation {
+    condition     = length(var.zitadel_masterkey) == 32
+    error_message = "Zitadel masterkey must be exactly 32 characters long."
+  }
+}
+
+variable "zitadel_admin_username" {
+  description = "Initial Zitadel admin username"
+  type        = string
+  default     = "zitadel-admin"
+}
+
+variable "zitadel_admin_password" {
+  description = "Initial Zitadel admin password"
+  type        = string
+  sensitive   = true
+  default     = "Password1!"
+}
+
+variable "zitadel_admin_email" {
+  description = "Initial Zitadel admin email"
+  type        = string
+  default     = "admin@localhost"
+}
+
+variable "chart_version" {
+  description = "Zitadel Helm chart version"
+  type        = string
+  default     = "9.13.0"
+}
+
+variable "image_tag" {
+  description = "Zitadel image tag"
+  type        = string
+  default     = "v4.2.0"
 }

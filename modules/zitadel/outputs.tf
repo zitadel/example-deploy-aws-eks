@@ -38,7 +38,7 @@ output "rds_security_group_id" {
   value       = aws_security_group.rds.id
 }
 
-output "kubernetes_secret_name" {
-  description = "Kubernetes secret name containing DB credentials"
-  value       = kubernetes_secret.db_credentials.metadata[0].name
+output "zitadel_url" {
+  description = "Zitadel external URL"
+  value       = "https://${var.domain}"
 }

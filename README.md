@@ -1,5 +1,11 @@
 WIP
 
+
+
+login with
+zitadel-admin@zitadel.zitadel.aws.mrida.ng
+2. Enter password: `Password1!`
+
 Prerequisites:
 
 Add DNS

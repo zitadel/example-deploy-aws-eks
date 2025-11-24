@@ -1,41 +1,39 @@
 resource "helm_release" "zitadel" {
   name             = "zitadel"
-  chart            = "./podinfo"
+  chart            = "${path.root}/zitadel"
   namespace        = var.namespace
   create_namespace = true
-  wait             = true
-  timeout          = 300
-
+  atomic           = true
+  timeout          = 6000
   values = [
     yamlencode({
-      service = {
-        type         = "ClusterIP"
-        httpPort     = var.service_http_port
-        externalPort = var.service_http_port
-        grpcPort     = var.service_grpc_port
+      image = {
+        tag = var.image_tag
       }
-      extraEnvs = [
-        {
-          name  = "OTEL_EXPORTER_OTLP_ENDPOINT"
-          value = var.otlp_endpoint
-        }
-      ]
-      extraArgs = [
-        "--otel-service-name=${var.otlp_service_name}"
-      ]
+
+      replicaCount = 2
+
+      service = {
+        type        = "ClusterIP"
+        port        = 8080
+        protocol    = "http"
+        appProtocol = "http"
+      }
+
       ingress = {
-        enabled   = true
-        className = var.ingress_class
+        enabled    = true
+        className  = var.ingress_class
+        controller = "aws"
         annotations = {
           "alb.ingress.kubernetes.io/group.name"       = var.alb_group_name
           "alb.ingress.kubernetes.io/scheme"           = var.alb_scheme
           "alb.ingress.kubernetes.io/target-type"      = var.alb_target_type
-          "alb.ingress.kubernetes.io/healthcheck-path" = var.healthcheck_path
           "alb.ingress.kubernetes.io/listen-ports"     = "[{\"HTTP\":80},{\"HTTPS\":443}]"
           "alb.ingress.kubernetes.io/ssl-redirect"     = "443"
           "alb.ingress.kubernetes.io/certificate-arn"  = var.certificate_arn
           "alb.ingress.kubernetes.io/subnets"          = join(",", var.subnet_ids)
           "alb.ingress.kubernetes.io/backend-protocol" = "HTTP"
+          "alb.ingress.kubernetes.io/healthcheck-path" = "/debug/healthz"
         }
         hosts = [
           {
@@ -49,53 +47,122 @@ resource "helm_release" "zitadel" {
           }
         ]
       }
-    })
-  ]
-}
 
-resource "kubectl_manifest" "zitadel_grpc_ingress" {
-  yaml_body = yamlencode({
-    apiVersion = "networking.k8s.io/v1"
-    kind       = "Ingress"
-    metadata = {
-      name      = "zitadel-grpc"
-      namespace = var.namespace
-      annotations = {
-        "alb.ingress.kubernetes.io/group.name"               = var.alb_group_name
-        "alb.ingress.kubernetes.io/scheme"                   = var.alb_scheme
-        "alb.ingress.kubernetes.io/target-type"              = var.alb_target_type
-        "alb.ingress.kubernetes.io/backend-protocol-version" = "HTTP2"
-        "alb.ingress.kubernetes.io/listen-ports"             = "[{\"HTTPS\":8443}]"
-        "alb.ingress.kubernetes.io/certificate-arn"          = var.certificate_arn
-        "alb.ingress.kubernetes.io/subnets"                  = join(",", var.subnet_ids)
-      }
-    }
-    spec = {
-      ingressClassName = var.ingress_class
-      rules = [
-        {
-          http = {
-            paths = [
-              {
-                path     = "/"
-                pathType = "Prefix"
-                backend = {
-                  service = {
-                    name = "zitadel"
-                    port = {
-                      number = var.service_grpc_port
-                    }
-                  }
-                }
-              }
-            ]
+      login = {
+        enabled = true
+        ingress = {
+          enabled     = true
+          className   = var.ingress_class
+          controller  = "aws"
+          annotations = {
+            "alb.ingress.kubernetes.io/group.name"       = var.alb_group_name
+            "alb.ingress.kubernetes.io/group.order"      = "-2"
+            "alb.ingress.kubernetes.io/scheme"           = var.alb_scheme
+            "alb.ingress.kubernetes.io/target-type"      = var.alb_target_type
+            "alb.ingress.kubernetes.io/certificate-arn"  = var.certificate_arn
+            "alb.ingress.kubernetes.io/subnets"          = join(",", var.subnet_ids)
+            "alb.ingress.kubernetes.io/backend-protocol" = "HTTP"
           }
         }
-      ]
-    }
-  })
+      }
 
-  depends_on = [helm_release.zitadel]
+      initJob = {
+        enabled               = true
+        activeDeadlineSeconds = 600
+        backoffLimit          = 5
+      }
+
+      setupJob = {
+        enabled               = true
+        activeDeadlineSeconds = 600
+        backoffLimit          = 5
+      }
+
+      metrics = {
+        enabled = true
+        serviceMonitor = {
+          enabled = false
+        }
+      }
+
+      env = [
+        {
+          name  = "ZITADEL_TRACING_TYPE"
+          value = "otel"
+        },
+        {
+          name  = "ZITADEL_TRACING_ENDPOINT"
+          value = var.otlp_endpoint
+        },
+        {
+          name  = "ZITADEL_TRACING_SERVICENAME"
+          value = "zitadel"
+        },
+        {
+          name  = "OTEL_METRICS_EXEMPLAR_FILTER"
+          value = "always_off"
+        },
+        {
+          name  = "OTEL_LOG_LEVEL"
+          value = "error"
+        }
+      ]
+
+      zitadel = {
+        masterkey = var.zitadel_masterkey
+
+        configmapConfig = {
+          ExternalPort   = 443
+          ExternalSecure = true
+          ExternalDomain = var.domain
+
+          TLS = {
+            Enabled = false
+          }
+
+          Database = {
+            Postgres = {
+              Host     = aws_db_instance.this.address
+              Port     = aws_db_instance.this.port
+              Database = aws_db_instance.this.db_name
+              User = {
+                Username = aws_db_instance.this.username
+                Password = random_password.db_password.result
+                SSL = {
+                  Mode = "require"
+                }
+              }
+              Admin = {
+                Username = var.db_master_username
+                Password = random_password.db_password.result
+                SSL = {
+                  Mode = "require"
+                }
+              }
+            }
+          }
+
+          FirstInstance = {
+            Org = {
+              Human = {
+                UserName               = var.zitadel_admin_username
+                Password               = var.zitadel_admin_password
+                FirstName              = "ZITADEL"
+                LastName               = "Admin"
+                Email                  = var.zitadel_admin_email
+                PasswordChangeRequired = false
+              }
+            }
+          }
+        }
+      }
+    })
+  ]
+
+  depends_on = [
+    aws_db_instance.this,
+    aws_secretsmanager_secret_version.db_credentials
+  ]
 }
 
 data "kubernetes_ingress_v1" "zitadel" {

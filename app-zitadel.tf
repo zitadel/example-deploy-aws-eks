@@ -13,6 +13,11 @@ module "zitadel" {
   eks_node_security_group_id = module.eks.node_security_group_id
   common_tags                = local.common_tags
 
+  zitadel_masterkey      = var.zitadel_masterkey
+  zitadel_admin_username = var.zitadel_admin_username
+  zitadel_admin_password = var.zitadel_admin_password
+  zitadel_admin_email    = var.zitadel_admin_email
+
   depends_on = [
     module.alb_controller,
     module.collector_support
