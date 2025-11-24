@@ -6,7 +6,7 @@ resource "aws_acm_certificate" "wildcard" {
     create_before_destroy = true
   }
 
-  tags = local.common_tags
+  tags = var.tags
 }
 
 resource "aws_route53_record" "cert_validation" {
@@ -28,8 +28,4 @@ resource "aws_route53_record" "cert_validation" {
 resource "aws_acm_certificate_validation" "wildcard" {
   certificate_arn         = aws_acm_certificate.wildcard.arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
-}
-
-output "certificate_arn" {
-  value = aws_acm_certificate.wildcard.arn
 }
