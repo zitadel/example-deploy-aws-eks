@@ -3,7 +3,7 @@ module "eks" {
   version = "20.37.2"
 
   cluster_name    = local.cluster_name
-  cluster_version = "1.29"
+  cluster_version = var.cluster_version
   subnet_ids      = local.two_public_subnets
   vpc_id          = data.aws_vpc.default.id
 
@@ -31,10 +31,10 @@ module "eks" {
 
   eks_managed_node_groups = {
     default = {
-      desired_size   = 2
-      min_size       = 2
-      max_size       = 3
-      instance_types = ["t3.medium"]
+      desired_size   = var.node_desired_size
+      min_size       = var.node_min_size
+      max_size       = var.node_max_size
+      instance_types = var.node_instance_types
       capacity_type  = "ON_DEMAND"
       subnet_ids     = local.two_public_subnets
       tags           = local.common_tags
