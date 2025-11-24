@@ -8,16 +8,14 @@ module "zitadel" {
   certificate_arn = aws_acm_certificate.wildcard.arn
   subnet_ids      = local.two_public_subnets
   alb_group_name  = "podinfo"
-  otlp_endpoint   = "http://adot-collector-daemonset-service.amazon-cloudwatch.svc.cluster.local:4317"
-
+  otlp_endpoint   = module.collector_support.otlp_grpc_endpoint
   vpc_id                     = data.aws_vpc.default.id
   eks_node_security_group_id = module.eks.node_security_group_id
-
   common_tags = local.common_tags
 
   depends_on = [
     helm_release.aws_load_balancer_controller,
-    helm_release.adot_collector,
+    module.collector_support,
     aws_acm_certificate_validation.wildcard
   ]
 }
